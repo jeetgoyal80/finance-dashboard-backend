@@ -1,3 +1,18 @@
+const dotenv = require('dotenv');
+
+dotenv.config();
+
+const productionServerUrl = 'https://finance-dashboard-backend-qt0u.onrender.com';
+const serverUrl =
+  process.env.NODE_ENV === 'production'
+    ? productionServerUrl
+    : 'http://localhost:5000';
+
+const serverDescription =
+  process.env.NODE_ENV === 'production'
+    ? 'Production server'
+    : 'Local development server';
+
 const openApiSpec = {
   openapi: '3.0.3',
   info: {
@@ -7,8 +22,8 @@ const openApiSpec = {
   },
   servers: [
     {
-      url: 'http://localhost:5000',
-      description: 'Local development server'
+      url: serverUrl,
+      description: serverDescription
     }
   ],
   components: {

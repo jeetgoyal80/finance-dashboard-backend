@@ -4,6 +4,7 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const swaggerUi = require('swagger-ui-express');
 
+const env = require('./config/env');
 const openApiSpec = require('./docs/openapi');
 const authRoutes = require('./modules/auth/auth.routes');
 const userRoutes = require('./modules/user/user.routes');
@@ -12,9 +13,15 @@ const analyticsRoutes = require('./modules/analytics/analytics.routes');
 const { notFoundHandler, errorHandler } = require('./middleware/error.middleware');
 
 const app = express();
+const corsOptions = {
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
 
 app.use(helmet());
-app.use(cors());
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
@@ -35,7 +42,17 @@ app.get('/health', (req, res) => {
   });
 });
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiSpec, { explorer: true }));
+app.use(
+  '/api-docs',
+  swaggerUi.serve,
+  swaggerUi.setup(openApiSpec, {
+    explorer: true,
+    swaggerOptions: {
+      persistAuthorization: true
+    },
+    customSiteTitle: env.nodeEnv === 'production' ? 'Finance Dashboard API Docs' : 'Finance Dashboard API Docs (Local)'
+  })
+);
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
